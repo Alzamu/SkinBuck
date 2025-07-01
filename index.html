@@ -10,25 +10,42 @@
       font-family: 'Segoe UI', sans-serif;
       background-color: #0f0f0f;
       color: #f2f2f2;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      background-color: #0f0f0f;
+      padding: 15px 30px;
+      border-bottom: 1px solid #222;
+    }
+
+    header img {
+      height: 40px;
+    }
+
+    main {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
       text-align: center;
-      padding: 20px;
+      padding: 60px 20px;
     }
+
     h1 {
       font-size: 3rem;
       margin-bottom: 10px;
       color: #ffd700;
     }
+
     p {
       font-size: 1.2rem;
       max-width: 600px;
       margin-bottom: 30px;
       line-height: 1.5;
     }
+
     .btn {
       background-color: #ffd700;
       color: #000;
@@ -42,25 +59,35 @@
       text-decoration: none;
       display: inline-block;
     }
+
     .btn:hover {
       background-color: #e6c200;
     }
+
     footer {
-      position: absolute;
-      bottom: 10px;
+      text-align: center;
+      padding: 20px;
       font-size: 0.9rem;
       color: #777;
     }
   </style>
 </head>
 <body>
-  <h1>SkinBuck</h1>
-  <p>¿Tienes skins de CS2 y quieres venderlas por dinero real? Estás en el lugar correcto.  
-  Entra a nuestro Discord y abre un ticket. ¡Te pagamos justo y rápido vía PayPal!</p>
-  <a class="btn" href="https://discord.gg/zw3EuuvTGT" target="_blank">Vender mis Skins</a>
+
+  <header>
+    <img src="logo.png" alt="SkinBuck logo">
+  </header>
+
+  <main>
+    <h1>SkinBuck</h1>
+    <p>¿Tienes skins de CS2 y quieres venderlas por dinero real? Estás en el lugar correcto.  
+    Entra a nuestro Discord y abre un ticket. ¡Te pagamos justo y rápido vía PayPal!</p>
+    <a class="btn" href="https://discord.gg/zw3EuuvTGT" target="_blank">Vender mis Skins</a>
+  </main>
 
   <footer>
     © 2025 SkinBuck. Todos los derechos reservados.
   </footer>
+
 </body>
 </html>
