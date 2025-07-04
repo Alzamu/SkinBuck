@@ -151,20 +151,24 @@
 </head>
 <body>
 
-  <header>
-    <img src="logo.png" alt="SkinBuck logo">
-    <input
-  type="text"
-  id="searchInput"
-  placeholder="Buscar skins..."
-  style="padding: 8px 12px; border-radius: 8px; border: none; font-size: 14px; width: 220px; margin-right: 20px;"/>
-    <nav>
-      <a href="#inicio">Inicio</a>
-      <a href="#funciona">Cómo funciona</a>
-      <a href="#confianza">Por qué SkinBuck</a>
-    </nav>
-    <div id="searchResults" style="padding: 30px; max-width: 1000px; margin: auto;"></div>
-  </header>
+ <header style="display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background-color: #0f0f0f;">
+  <div style="display: flex; align-items: center;">
+    <img src="logo.png" alt="SkinBuck logo" style="height: 40px; margin-right: 20px;" />
+    <div style="position: relative;">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Buscar skins..."
+        style="padding: 8px 12px; border-radius: 8px; border: none; font-size: 14px; width: 220px;" />
+      <div id="suggestions" style="position: absolute; top: 38px; left: 0; width: 100%; background-color: #1a1a1a; border-radius: 8px; max-height: 200px; overflow-y: auto; display: none; z-index: 10;"></div>
+    </div>
+  </div>
+  <nav>
+    <a href="#inicio" style="margin-left: 20px; color: white; text-decoration: none; font-weight: bold;">Inicio</a>
+    <a href="#funciona" style="margin-left: 20px; color: white; text-decoration: none; font-weight: bold;">Cómo funciona</a>
+    <a href="#confianza" style="margin-left: 20px; color: white; text-decoration: none; font-weight: bold;">Por qué SkinBuck</a>
+  </nav>
+</header>
 
   <main id="inicio">
     <h1>SkinBuck</h1>
@@ -238,6 +242,72 @@
       )
       .join('')
   })
+</script>
+  <script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+  const supabaseUrl = "https://vcgcthhktnxkonsjhcxr.supabase.co"
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjZ2N0aGhrdG54a29uc2poY3hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MzYyMDgsImV4cCI6MjA2NzIxMjIwOH0.NLR_Q30N_vYCBCclWju4is73yr4CP6655BOiDkfMrUM"
+  const supabase = createClient(supabaseUrl, supabaseKey)
+
+  const input = document.getElementById('searchInput')
+  const suggestions = document.getElementById('suggestions')
+  const searchResults = document.getElementById('searchResults')
+
+  input.addEventListener('input', async () => {
+    const term = input.value.trim()
+
+    if (term.length < 2) {
+      suggestions.style.display = 'none'
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('skins_prices')
+      .select('*')
+      .ilike('name', `%${term}%`)
+      .limit(5)
+
+    if (error) {
+      console.error(error)
+      return
+    }
+
+    suggestions.innerHTML = ''
+    data.forEach(item => {
+      const option = document.createElement('div')
+      option.textContent = `${item.name} (${item.wear})`
+      option.style.padding = '10px'
+      option.style.cursor = 'pointer'
+      option.addEventListener('click', () => {
+        input.value = item.name
+        suggestions.style.display = 'none'
+        showSkin(item)
+      })
+      suggestions.appendChild(option)
+    })
+
+    suggestions.style.display = data.length ? 'block' : 'none'
+  })
+
+  document.addEventListener('click', e => {
+    if (!suggestions.contains(e.target) && e.target !== input) {
+      suggestions.style.display = 'none'
+    }
+  })
+
+  function showSkin(item) {
+    searchResults.innerHTML = `
+      <div class="card">
+        <img src="${item.image_url}" alt="${item.name}" />
+        <div class="card-content">
+          <h3>${item.name} (${item.wear})</h3>
+          <p>💰 Precio: $${item.price.toFixed(2)} USD</p>
+          <p>🕒 Fecha: ${item.date}</p>
+        </div>
+      </div>
+    `
+  }
 </script>
 </body>
 </html>
