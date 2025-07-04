@@ -243,24 +243,18 @@
       .join('')
   })
 </script>
-  <script type="module">
+<script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
   const supabaseUrl = "https://vcgcthhktnxkonsjhcxr.supabase.co"
   const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjZ2N0aGhrdG54a29uc2poY3hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MzYyMDgsImV4cCI6MjA2NzIxMjIwOH0.NLR_Q30N_vYCBCclWju4is73yr4CP6655BOiDkfMrUM"
   const supabase = createClient(supabaseUrl, supabaseKey)
 
-  const input = document.getElementById('searchInput')
-  const suggestions = document.getElementById('suggestions')
-  const searchResults = document.getElementById('searchResults')
+  const searchInput = document.getElementById('searchInput')
 
-  input.addEventListener('input', async () => {
-    const term = input.value.trim()
-
-    if (term.length < 2) {
-      suggestions.style.display = 'none'
-      return
-    }
+  searchInput.addEventListener('input', async () => {
+    const term = searchInput.value.trim()
+    if (term.length === 0) return
 
     const { data, error } = await supabase
       .from('skins_prices')
@@ -269,45 +263,37 @@
       .limit(5)
 
     if (error) {
-      console.error(error)
+      console.error('Error buscando skins:', error)
       return
     }
 
-    suggestions.innerHTML = ''
+    // Elimina resultados anteriores
+    let resultsBox = document.getElementById('resultsBox')
+    if (!resultsBox) {
+      resultsBox = document.createElement('div')
+      resultsBox.id = 'resultsBox'
+      resultsBox.style.position = 'absolute'
+      resultsBox.style.backgroundColor = 'white'
+      resultsBox.style.color = 'black'
+      resultsBox.style.zIndex = 1000
+      resultsBox.style.width = searchInput.offsetWidth + 'px'
+      searchInput.parentNode.appendChild(resultsBox)
+    }
+    resultsBox.innerHTML = ''
+
     data.forEach(item => {
       const option = document.createElement('div')
-      option.textContent = `${item.name} (${item.wear})`
-      option.style.padding = '10px'
+      option.textContent = item.name
+      option.style.padding = '8px'
       option.style.cursor = 'pointer'
       option.addEventListener('click', () => {
-        input.value = item.name
-        suggestions.style.display = 'none'
-        showSkin(item)
+        alert(`Has seleccionado: ${item.name}`)
+        resultsBox.innerHTML = ''
+        searchInput.value = item.name
       })
-      suggestions.appendChild(option)
+      resultsBox.appendChild(option)
     })
-
-    suggestions.style.display = data.length ? 'block' : 'none'
   })
-
-  document.addEventListener('click', e => {
-    if (!suggestions.contains(e.target) && e.target !== input) {
-      suggestions.style.display = 'none'
-    }
-  })
-
-  function showSkin(item) {
-    searchResults.innerHTML = `
-      <div class="card">
-        <img src="${item.image_url}" alt="${item.name}" />
-        <div class="card-content">
-          <h3>${item.name} (${item.wear})</h3>
-          <p>💰 Precio: $${item.price.toFixed(2)} USD</p>
-          <p>🕒 Fecha: ${item.date}</p>
-        </div>
-      </div>
-    `
-  }
 </script>
 </body>
 </html>
