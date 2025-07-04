@@ -261,6 +261,7 @@
       .select('*')
       .ilike('name', `%${term}%`)
       .limit(5)
+    console.log('Resultados:', data)
 
     if (error) {
       console.error('Error buscando skins:', error)
