@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skin Prices</title>
+  <style>
+    body {
+      background-color: #0f0f0f;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #1e1e1e;
+    }
+    th, td {
+      border: 1px solid #333;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #292929;
+    }
+    img {
+      width: 100px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔫 Skin Prices</h1>
+  <table id="pricesTable">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Name</th>
+        <th>Wear</th>
+        <th>Price ($)</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+    const supabaseUrl = "https://vcgcthhktnxkonsjhcxr.supabase.co"
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjZ2N0aGhrdG54a29uc2poY3hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MzYyMDgsImV4cCI6MjA2NzIxMjIwOH0.NLR_Q30N_vYCBCclWju4is73yr4CP6655BOiDkfMrUM"
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    const tableBody = document.querySelector("#pricesTable tbody")
+
+    const { data, error } = await supabase
+      .from('skins_prices')
+      .select('*')
+      .order('date', { ascending: false })
+
+    if (error) {
+      console.error("Error loading data:", error)
+    } else {
+      data.forEach(row => {
+        const tr = document.createElement("tr")
+        tr.innerHTML = `
+          <td><img src="${row.image_url}" alt="skin" /></td>
+          <td>${row.name}</td>
+          <td>${row.wear}</td>
+          <td>$${row.price}</td>
+          <td>${row.date}</td>
+        `
+        tableBody.appendChild(tr)
+      })
+    }
+  </script>
+</body>
+</html>
