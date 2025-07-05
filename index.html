@@ -201,17 +201,33 @@
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-  const supabaseUrl = 'https://vcgcthhktnxkonsjhcxr.supabase.co'
-  const supabaseKey = 'TU_ANON_KEY_AQUI'
+  const supabaseUrl = "https://vcgcthhktnxkonsjhcxr.supabase.co"
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjZ2N0aGhrdG54a29uc2poY3hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MzYyMDgsImV4cCI6MjA2NzIxMjIwOH0.NLR_Q30N_vYCBCclWju4is73yr4CP6655BOiDkfMrUM"
   const supabase = createClient(supabaseUrl, supabaseKey)
 
-  const input = document.getElementById('searchInput')
+  const searchInput = document.getElementById('searchInput')
   const resultsDiv = document.getElementById('searchResults')
 
-  input.addEventListener('input', async () => {
-    const searchTerm = input.value.trim().toLowerCase()
+  // Crea dropdown de sugerencias
+  const suggestions = document.createElement('div')
+  suggestions.id = 'resultsBox'
+  suggestions.style.position = 'absolute'
+  suggestions.style.backgroundColor = '#1a1a1a'
+  suggestions.style.color = 'white'
+  suggestions.style.zIndex = 1000
+  suggestions.style.borderRadius = '8px'
+  suggestions.style.width = searchInput.offsetWidth + 'px'
+  suggestions.style.maxHeight = '200px'
+  suggestions.style.overflowY = 'auto'
+  suggestions.style.display = 'none'
+  searchInput.parentNode.appendChild(suggestions)
 
-    if (searchTerm.length < 2) {
+  searchInput.addEventListener('input', async () => {
+    const term = searchInput.value.trim()
+
+    if (term.length < 2) {
+      suggestions.innerHTML = ''
+      suggestions.style.display = 'none'
       resultsDiv.innerHTML = ''
       return
     }
@@ -219,82 +235,50 @@
     const { data, error } = await supabase
       .from('skins_prices')
       .select('*')
-      .ilike('name', `%${searchTerm}%`)
-
-    if (error) {
-      console.error(error)
-      return
-    }
-
-    resultsDiv.innerHTML = data
-      .map(
-        (skin) => `
-        <div style="background: #1a1a1a; color: white; padding: 16px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 20px;">
-          <img src="${skin.image_url}" alt="${skin.name}" width="90" style="border-radius: 8px;" />
-          <div>
-            <strong>${skin.name}</strong><br/>
-            Estado: ${skin.wear}<br/>
-            Precio: $${skin.price}<br/>
-            Fecha: ${skin.date}
-          </div>
-        </div>
-      `
-      )
-      .join('')
-  })
-</script>
-<script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js'
-
-  const supabaseUrl = "https://vcgcthhktnxkonsjhcxr.supabase.co"
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjZ2N0aGhrdG54a29uc2poY3hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MzYyMDgsImV4cCI6MjA2NzIxMjIwOH0.NLR_Q30N_vYCBCclWju4is73yr4CP6655BOiDkfMrUM"
-  const supabase = createClient(supabaseUrl, supabaseKey)
-
-  const searchInput = document.getElementById('searchInput')
-
-  searchInput.addEventListener('input', async () => {
-    const term = searchInput.value.trim()
-    if (term.length === 0) return
-
-    const { data, error } = await supabase
-      .from('skins_prices')
-      .select('*')
       .ilike('name', `%${term}%`)
       .limit(5)
-    console.log('Resultados:', data)
 
     if (error) {
       console.error('Error buscando skins:', error)
       return
     }
 
-    // Elimina resultados anteriores
-    let resultsBox = document.getElementById('resultsBox')
-    if (!resultsBox) {
-      resultsBox = document.createElement('div')
-      resultsBox.id = 'resultsBox'
-      resultsBox.style.position = 'absolute'
-      resultsBox.style.backgroundColor = 'white'
-      resultsBox.style.color = 'black'
-      resultsBox.style.zIndex = 1000
-      resultsBox.style.width = searchInput.offsetWidth + 'px'
-      searchInput.parentNode.appendChild(resultsBox)
-    }
-    resultsBox.innerHTML = ''
+    suggestions.innerHTML = ''
+    suggestions.style.display = data.length ? 'block' : 'none'
 
     data.forEach(item => {
       const option = document.createElement('div')
-      option.textContent = item.name
-      option.style.padding = '8px'
+      option.textContent = `${item.name} (${item.wear})`
+      option.style.padding = '10px'
       option.style.cursor = 'pointer'
       option.addEventListener('click', () => {
-        alert(`Has seleccionado: ${item.name}`)
-        resultsBox.innerHTML = ''
         searchInput.value = item.name
+        suggestions.style.display = 'none'
+        showSkin(item)
       })
-      resultsBox.appendChild(option)
+      suggestions.appendChild(option)
     })
   })
+
+  document.addEventListener('click', e => {
+    if (!suggestions.contains(e.target) && e.target !== searchInput) {
+      suggestions.style.display = 'none'
+    }
+  })
+
+  function showSkin(item) {
+    resultsDiv.innerHTML = `
+      <div style="background: #1a1a1a; color: white; padding: 16px; border-radius: 8px; margin-top: 20px; display: flex; align-items: center; gap: 20px;">
+        <img src="${item.image_url}" alt="${item.name}" width="90" style="border-radius: 8px;" />
+        <div>
+          <strong>${item.name}</strong><br/>
+          Estado: ${item.wear}<br/>
+          Precio: $${item.price}<br/>
+          Fecha: ${item.date}
+        </div>
+      </div>
+    `
+  }
 </script>
 </body>
 </html>
